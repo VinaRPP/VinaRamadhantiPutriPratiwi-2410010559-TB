@@ -1,0 +1,417 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+import java.sql.*;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+/**
+ *
+ * @author ACER
+ */
+public class PegawaiForm extends javax.swing.JFrame {
+    private DefaultTableModel model;
+    /**
+     * Creates new form PegawaiForm
+     */
+    public PegawaiForm() {
+        initComponents();
+        getContentPane().setBackground(new java.awt.Color(0, 212, 199));
+        model = (DefaultTableModel) tblPegawai.getModel();
+        loadJabatan();  // Load data jabatan ke JComboBox
+        loadData();     // Load data pegawai ke JTable
+    }
+    // 🔹 Load Data Jabatan ke ComboBox (ID & Nama Jabatan)
+    private void loadJabatan() {
+        try (Connection con = Koneksi.getKoneksi()) {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT id_jabatan, nama_jabatan FROM jabatan");
+            cmbJabatan.removeAllItems();
+            while (rs.next()) {
+                cmbJabatan.addItem(rs.getInt("id_jabatan") + " - " + rs.getString("nama_jabatan"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 🔹 Load Data Pegawai ke JTable dengan JOIN Jabatan
+    private void loadData() {
+        model.setRowCount(0);
+        try (Connection con = Koneksi.getKoneksi()) {
+            Statement stmt = con.createStatement();
+            String sql = "SELECT pegawai.id_pegawai, pegawai.nama, pegawai.alamat, jabatan.id_jabatan, jabatan.nama_jabatan " +
+                         "FROM pegawai JOIN jabatan ON pegawai.id_jabatan = jabatan.id_jabatan";
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt("id_pegawai"),
+                    rs.getString("nama"),
+                    rs.getString("alamat"),
+                    rs.getInt("id_jabatan"),  // Tambahkan id_jabatan
+                    rs.getString("nama_jabatan")
+                });
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 🔹 Tambah Data Pegawai
+    private void tambahData() {
+        try (Connection con = Koneksi.getKoneksi()) {
+            String sql = "INSERT INTO pegawai (nama, alamat, id_jabatan) VALUES (?, ?, ?)";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, txtNama.getText());
+            ps.setString(2, txtAlamat.getText());
+
+            // Ambil ID Jabatan dari ComboBox
+            String selectedJabatan = cmbJabatan.getSelectedItem().toString();
+            int idJabatan = Integer.parseInt(selectedJabatan.split(" - ")[0]);  
+            ps.setInt(3, idJabatan);
+
+            ps.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Data Berhasil Ditambahkan!");
+            loadData();
+            resetForm();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 🔹 Edit Data Pegawai
+    private void editData() {
+        try (Connection con = Koneksi.getKoneksi()) {
+            String sql = "UPDATE pegawai SET nama=?, alamat=?, id_jabatan=? WHERE id_pegawai=?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, txtNama.getText());
+            ps.setString(2, txtAlamat.getText());
+
+            // Ambil ID Jabatan dari ComboBox
+            String selectedJabatan = cmbJabatan.getSelectedItem().toString();
+            int idJabatan = Integer.parseInt(selectedJabatan.split(" - ")[0]);  
+            ps.setInt(3, idJabatan);
+            ps.setInt(4, Integer.parseInt(txtId.getText()));
+
+            ps.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Data Berhasil Diperbarui!");
+            loadData();
+            resetForm();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 🔹 Hapus Data Pegawai
+    private void hapusData() {
+        try (Connection con = Koneksi.getKoneksi()) {
+            String sql = "DELETE FROM pegawai WHERE id_pegawai = ?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, Integer.parseInt(txtId.getText()));
+            ps.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Data Berhasil Dihapus!");
+            loadData();
+            resetForm();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 🔹 Reset Form
+    private void resetForm() {
+        txtId.setText("");
+        txtNama.setText("");
+        txtAlamat.setText("");
+        cmbJabatan.setSelectedIndex(0);
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        txtNama = new javax.swing.JTextField();
+        txtAlamat = new javax.swing.JTextField();
+        btnTambah = new javax.swing.JButton();
+        btnEdit = new javax.swing.JButton();
+        btnHapus = new javax.swing.JButton();
+        btnReset = new javax.swing.JButton();
+        cmbJabatan = new javax.swing.JComboBox<>();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        txtId = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblPegawai = new javax.swing.JTable();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jLabel1.setText("Nama");
+
+        jLabel2.setText("Alamat");
+
+        txtNama.setToolTipText("Masukkan Nama");
+
+        txtAlamat.setToolTipText("Masukkan Alamat");
+
+        btnTambah.setText("Tambah");
+        btnTambah.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTambahActionPerformed(evt);
+            }
+        });
+
+        btnEdit.setText("Edit");
+        btnEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditActionPerformed(evt);
+            }
+        });
+
+        btnHapus.setText("Hapus");
+        btnHapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHapusActionPerformed(evt);
+            }
+        });
+
+        btnReset.setText("Reset");
+        btnReset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnResetActionPerformed(evt);
+            }
+        });
+
+        cmbJabatan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbJabatan.setToolTipText("Pilih Jabatan");
+
+        jLabel4.setText("Jabatan");
+
+        jLabel3.setText("ID");
+
+        txtId.setEditable(false);
+        txtId.setText("ID");
+        txtId.setToolTipText("");
+
+        tblPegawai.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "ID", "NAMA", "ALAMAT", "Title 4"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, true, true, true
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblPegawai.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblPegawaiMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblPegawai);
+
+        jScrollPane2.setViewportView(jScrollPane1);
+
+        jLabel5.setFont(new java.awt.Font("Trajan Pro", 1, 14)); // NOI18N
+        jLabel5.setText("DATA PEGAWAI");
+
+        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/exit.png"))); // NOI18N
+        jLabel6.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel6MouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel5)
+                        .addGap(128, 128, 128)
+                        .addComponent(jLabel6))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 463, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createSequentialGroup()
+                            .addGap(67, 67, 67)
+                            .addComponent(btnTambah)
+                            .addGap(18, 18, 18)
+                            .addComponent(btnEdit)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(btnHapus)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(btnReset))
+                        .addGroup(layout.createSequentialGroup()
+                            .addGap(38, 38, 38)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel4)
+                                    .addGap(40, 40, 40)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(txtNama)
+                                        .addComponent(txtAlamat)
+                                        .addComponent(cmbJabatan, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(txtId, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(jLabel2)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING))))))
+                .addContainerGap(13, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel6)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
+                .addGap(3, 3, 3)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(txtNama, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtAlamat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbJabatan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnTambah)
+                    .addComponent(btnEdit)
+                    .addComponent(btnHapus)
+                    .addComponent(btnReset))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(28, 28, 28))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void tblPegawaiMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblPegawaiMouseClicked
+        // TODO add your handling code here:
+        int row = tblPegawai.getSelectedRow();
+        txtId.setText(tblPegawai.getValueAt(row, 0).toString());
+        txtNama.setText(tblPegawai.getValueAt(row, 1).toString());
+        txtAlamat.setText(tblPegawai.getValueAt(row, 2).toString());
+
+        // Ambil id_jabatan & nama_jabatan dari JTable dan set di ComboBox
+        int idJabatan = (int) tblPegawai.getValueAt(row, 3);
+        String namaJabatan = tblPegawai.getValueAt(row, 4).toString();
+        cmbJabatan.setSelectedItem(idJabatan + " - " + namaJabatan);
+    
+    }//GEN-LAST:event_tblPegawaiMouseClicked
+
+    private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
+        // TODO add your handling code here:
+         tambahData();
+    }//GEN-LAST:event_btnTambahActionPerformed
+
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+        // TODO add your handling code here:
+        editData();
+    }//GEN-LAST:event_btnEditActionPerformed
+
+    private void btnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusActionPerformed
+        // TODO add your handling code here:
+        hapusData();
+    }//GEN-LAST:event_btnHapusActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        // TODO add your handling code here:
+        resetForm();
+    }//GEN-LAST:event_btnResetActionPerformed
+
+    private void jLabel6MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel6MouseClicked
+        // TODO add your handling code here:
+        this.setVisible(false);  // Sembunyikan Menu Utama
+        MenuUtama mu = new MenuUtama();
+        mu.setVisible(true);
+    }//GEN-LAST:event_jLabel6MouseClicked
+
+    /**
+     * @param args the command line arguments
+     */
+    
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(PegawaiForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(PegawaiForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(PegawaiForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(PegawaiForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new PegawaiForm().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnEdit;
+    private javax.swing.JButton btnHapus;
+    private javax.swing.JButton btnReset;
+    private javax.swing.JButton btnTambah;
+    private javax.swing.JComboBox<String> cmbJabatan;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable tblPegawai;
+    private javax.swing.JTextField txtAlamat;
+    private javax.swing.JTextField txtId;
+    private javax.swing.JTextField txtNama;
+    // End of variables declaration//GEN-END:variables
+}
